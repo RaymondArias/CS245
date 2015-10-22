@@ -2,8 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 public class Calculator {
 	JLabel calcScreen;
-	String [] buttonsIcons = {"0" , "1", "2", "3", "4", "5",
-							  "6", "7", "8", "9", "+", "-", "*", "/", "=", "C"};
+	String [] buttonIcons = {"7" , "8", "9", "/", "4", "5", "6", "x", "8", "9", "+", "-", "*", "/", "=", "C"};
 	public Calculator()
 	{
 		JFrame frame = new JFrame("Raymond Arias' Calculator");
@@ -15,10 +14,17 @@ public class Calculator {
 		JPanel display = new JPanel();
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new GridLayout(4,4));
+		for(int i = 0; i < buttonIcons.length; i++)
+		{
+			JButton calcButtons = new JButton(buttonIcons[i]);
+			buttons.add(calcButtons);
+		}
 		
 		calcScreen = new JLabel("0");
 		display.add(calcScreen);
+		
 		frame.add(display);
+		frame.add(buttons);
 		
 		frame.setVisible(true);
 	}
