@@ -2,16 +2,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Stack;
 public class Calculator implements ActionListener{
-	
-	private String operator1;
-	private String operand;
-	
+	private Stack <Integer> operatorStack;
+	private Stack <String> operandStack;
+	private boolean isNewNumber;
 	JLabel calcScreen;
 	String [] buttonIcons = {"7" , "8", "9", "/", "4", "5", "6", "x", "1", "2", "3", "-", "0", "C", "=", "+"};
 	
 	public Calculator()
 	{
+		operatorStack = new Stack<>();
+		operandStack = new Stack<>();
+		isNewNumber = false;
 		JFrame frame = new JFrame("Raymond Arias' Calculator");
 		frame.setSize(600, 200);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -45,9 +48,10 @@ public class Calculator implements ActionListener{
 		if(Character.isDigit(ae.getActionCommand().charAt(0)))
 		{
 			//Make method to get button push and add to label
-			if(calcScreen.getText().equals("0"))
+			if(calcScreen.getText().equals("0") || isNewNumber)
 			{
 				calcScreen.setText(ae.getActionCommand());
+				isNewNumber = false;
 			}
 			else
 			{
@@ -56,38 +60,48 @@ public class Calculator implements ActionListener{
 		}
 		else if(isOperand(ae.getActionCommand()))
 		{
-			String operand = ae.getActionCommand();
-			if(operand.equals("+"))
+		
+			if(operandStack.isEmpty())
 			{
-				operator1 = calcScreen.getText();
-				operand = ae.getActionCommand();
-			}
-			else if(operand.equals("-"))
-			{
-				operator1 = calcScreen.getText();
-				operand = ae.getActionCommand();
-			}
-			else if(operand.equals("x"))
-			{
-				operator1 = calcScreen.getText();
-				operand = ae.getActionCommand();
+				//Push number onto operator stack and operand
+				//onto operand stack
+				pushOperation(ae.getActionCommand());
+				isNewNumber = true;
 			}
 			else
 			{
-				operator1 = calcScreen.getText();
-				operand = ae.getActionCommand();
+				//There is operand on stack that needs to be evaluated
+				//then the new number needs to pushed onto to stack
+				operatorStack.push(doOperation());
+				pushOperation(ae.getActionCommand());
+				isNewNumber = true;
 			}
+			
 		}
 		else if(ae.getActionCommand().equals("="))
 		{
-			if(operand != null)
+			doOperation();
+			isNewNumber = true;
+			
+		
+		}
+		else if(ae.getActionCommand().equals("C"))
+		{
+			if((ae.getModifiers() & ActionEvent.CTRL_MASK) != 0)
 			{
-				if(operand.equals("+"))
+				calcScreen.setText("(c) 2015 Raymond Arias");
+			}
+			else
+			{
+				calcScreen.setText("0");
+				isNewNumber = true;
+				while (!operatorStack.isEmpty())
 				{
-					int newOutput = Integer.parseInt(operator1) + Integer.parseInt(calcScreen.getText());
-					calcScreen.setText(Integer.toString(newOutput));
-					operator1 = null;
-					operand = null;
+					operatorStack.pop();
+				}
+				while(!operandStack.empty())
+				{
+					operandStack.pop();
 				}
 			}
 		}
@@ -97,6 +111,72 @@ public class Calculator implements ActionListener{
 	{
 		return buttonPress.equals("+") || buttonPress.equals("-") 
 				|| buttonPress.equals("x") || buttonPress.equals("/");
+	}
+	public Integer doOperation()
+	{
+		int newOutput;
+		if(!operandStack.empty())
+		{
+			if(operandStack.peek().equals("+"))
+			{
+				newOutput = operatorStack.peek() + Integer.parseInt(calcScreen.getText());
+				calcScreen.setText(Integer.toString(newOutput));
+				operatorStack.pop();
+				operandStack.pop();
+				return newOutput;
+			}
+			else if(operandStack.peek().equals("-"))
+			{
+				newOutput = operatorStack.peek() - Integer.parseInt(calcScreen.getText());
+				calcScreen.setText(Integer.toString(newOutput));
+				operatorStack.pop();
+				operandStack.pop();
+				return newOutput;
+			}
+			else if(operandStack.peek().equals("x"))
+			{
+				newOutput = operatorStack.peek() * Integer.parseInt(calcScreen.getText());
+				calcScreen.setText(Integer.toString(newOutput));
+				operatorStack.pop();
+				operandStack.pop();
+				return newOutput;
+				
+			}
+			else
+			{
+				newOutput = operatorStack.peek() / Integer.parseInt(calcScreen.getText());
+				calcScreen.setText(Integer.toString(newOutput));
+				operatorStack.pop();
+				operandStack.pop();
+				return newOutput;
+			}
+			
+		}
+		return null;
+		
+	}
+	public void pushOperation(String tempOperand)
+	{
+		if(tempOperand.equals("+"))
+		{
+			operatorStack.push(Integer.parseInt(calcScreen.getText()));
+			operandStack.push(tempOperand);
+		}
+		else if(tempOperand.equals("-"))
+		{
+			operatorStack.push(Integer.parseInt(calcScreen.getText()));
+			operandStack.push(tempOperand);
+		}
+		else if(tempOperand.equals("x"))
+		{
+			operatorStack.push(Integer.parseInt(calcScreen.getText()));
+			operandStack.push(tempOperand);
+		}
+		else
+		{
+			operatorStack.push(Integer.parseInt(calcScreen.getText()));
+			operandStack.push(tempOperand);
+		}
 	}
 	public static void main(String []args)
 	{
