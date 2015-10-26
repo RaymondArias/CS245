@@ -29,6 +29,8 @@ public class Calculator implements ActionListener{
 		{
 			JButton calcButtons = new JButton(buttonIcons[i]);
 			calcButtons.addActionListener(this);
+			if(buttonIcons[i].equals("="))
+				frame.getRootPane().setDefaultButton(calcButtons);
 			buttons.add(calcButtons);
 		}
 		
@@ -55,7 +57,10 @@ public class Calculator implements ActionListener{
 			}
 			else
 			{
-				calcScreen.setText(calcScreen.getText()+ ae.getActionCommand());
+				if(!isError(null))
+				{
+					calcScreen.setText(calcScreen.getText()+ ae.getActionCommand());
+				}
 			}
 		}
 		else if(isOperand(ae.getActionCommand()))
@@ -177,6 +182,24 @@ public class Calculator implements ActionListener{
 			operatorStack.push(Integer.parseInt(calcScreen.getText()));
 			operandStack.push(tempOperand);
 		}
+	}
+	public boolean isError(Integer denominator)
+	{
+		
+		if(calcScreen.getText().length() >= 10)
+		{
+			calcScreen.setText("Overflow");
+			return true;
+		}
+		if(denominator == null)
+			return false;
+		if(denominator == 0)
+		{
+			calcScreen.setText("Div by 0");
+			return true;
+			
+		}
+		return false;
 	}
 	public static void main(String []args)
 	{
