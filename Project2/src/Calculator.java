@@ -7,6 +7,7 @@ public class Calculator implements ActionListener{
 	private Stack <Integer> operatorStack;
 	private Stack <String> operandStack;
 	private boolean isNewNumber;
+	private boolean inErrorState; 
 	JLabel calcScreen;
 	String [] buttonIcons = {"7" , "8", "9", "/", "4", "5", "6", "x", "1", "2", "3", "-", "0", "C", "=", "+"};
 	
@@ -15,6 +16,7 @@ public class Calculator implements ActionListener{
 		operatorStack = new Stack<>();
 		operandStack = new Stack<>();
 		isNewNumber = false;
+		inErrorState = false;
 		JFrame frame = new JFrame("Raymond Arias' Calculator");
 		frame.setSize(600, 200);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,6 +48,17 @@ public class Calculator implements ActionListener{
 	
 	public void actionPerformed(ActionEvent ae) 
 	{
+		//Program is in an error state
+		//User must press "C" to escape error state
+		if(inErrorState)
+		{
+			if(ae.getActionCommand().equals("C"))
+			{
+				clearOperation();
+				inErrorState = false;
+			}
+			return;
+		}
 		//Button pushed was number
 		if(Character.isDigit(ae.getActionCommand().charAt(0)))
 		{
@@ -87,8 +100,6 @@ public class Calculator implements ActionListener{
 		{
 			doOperation();
 			isNewNumber = true;
-			
-		
 		}
 		else if(ae.getActionCommand().equals("C"))
 		{
@@ -98,18 +109,11 @@ public class Calculator implements ActionListener{
 			}
 			else
 			{
-				calcScreen.setText("0");
-				isNewNumber = true;
-				while (!operatorStack.isEmpty())
-				{
-					operatorStack.pop();
-				}
-				while(!operandStack.empty())
-				{
-					operandStack.pop();
-				}
+				clearOperation();
 			}
 		}
+		if(isError(null))
+			return;
 		
 	}
 	public boolean isOperand(String buttonPress)
@@ -149,6 +153,8 @@ public class Calculator implements ActionListener{
 			}
 			else
 			{
+				if(isError(Integer.parseInt(calcScreen.getText())))
+					return null;
 				newOutput = operatorStack.peek() / Integer.parseInt(calcScreen.getText());
 				calcScreen.setText(Integer.toString(newOutput));
 				operatorStack.pop();
@@ -162,6 +168,10 @@ public class Calculator implements ActionListener{
 	}
 	public void pushOperation(String tempOperand)
 	{
+		if(inErrorState || isError(null))
+			return;
+		
+		
 		if(tempOperand.equals("+"))
 		{
 			operatorStack.push(Integer.parseInt(calcScreen.getText()));
@@ -186,9 +196,10 @@ public class Calculator implements ActionListener{
 	public boolean isError(Integer denominator)
 	{
 		
-		if(calcScreen.getText().length() >= 10)
+		if(calcScreen.getText().length() > 10)
 		{
 			calcScreen.setText("Overflow");
+			inErrorState = true;
 			return true;
 		}
 		if(denominator == null)
@@ -196,10 +207,25 @@ public class Calculator implements ActionListener{
 		if(denominator == 0)
 		{
 			calcScreen.setText("Div by 0");
+			inErrorState = true;
 			return true;
 			
 		}
 		return false;
+	}
+	public void clearOperation()
+	{
+		calcScreen.setText("0");
+		isNewNumber = true;
+		while (!operatorStack.isEmpty())
+		{
+			operatorStack.pop();
+		}
+		while(!operandStack.empty())
+		{
+			operandStack.pop();
+		}
+		
 	}
 	public static void main(String []args)
 	{
