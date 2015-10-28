@@ -2,9 +2,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Stack;
 public class Calculator implements ActionListener{
-	private Stack <Integer> operatorStack;
+	private Stack <Long> operatorStack;
 	private Stack <String> operandStack;
 	private boolean isNewNumber;
 	private boolean inErrorState; 
@@ -17,7 +19,17 @@ public class Calculator implements ActionListener{
 		operandStack = new Stack<>();
 		isNewNumber = false;
 		inErrorState = false;
+		
 		JFrame frame = new JFrame("Raymond Arias' Calculator");
+		try {
+			
+			URL iconURL = new URL("http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Calculator.png");
+			ImageIcon img = new ImageIcon(iconURL);
+			frame.setIconImage(img.getImage());
+		} catch (MalformedURLException e) {
+			
+			e.printStackTrace();
+		}
 		frame.setSize(600, 200);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -26,6 +38,8 @@ public class Calculator implements ActionListener{
 		JPanel display = new JPanel();
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new GridLayout(4,4));
+		
+		
 		
 		for(int i = 0; i < buttonIcons.length; i++)
 		{
@@ -36,9 +50,12 @@ public class Calculator implements ActionListener{
 			buttons.add(calcButtons);
 		}
 		
-		calcScreen = new JLabel("0");
-		display.add(calcScreen);
+		calcScreen = new JLabel("0", JLabel.RIGHT);
+		calcScreen.setHorizontalAlignment(JLabel.RIGHT);
+		calcScreen.setVerticalAlignment(JLabel.CENTER);
 		
+		display.add(calcScreen);
+		display.setBackground(Color.WHITE);
 		frame.add(display);
 		frame.add(buttons);
 		
@@ -59,6 +76,7 @@ public class Calculator implements ActionListener{
 			}
 			return;
 		}
+		
 		//Button pushed was number
 		if(Character.isDigit(ae.getActionCommand().charAt(0)))
 		{
@@ -70,7 +88,7 @@ public class Calculator implements ActionListener{
 			}
 			else
 			{
-				if(!isError(null))
+				if(calcScreen.getText().length() < 10)
 				{
 					calcScreen.setText(calcScreen.getText()+ ae.getActionCommand());
 				}
@@ -99,6 +117,15 @@ public class Calculator implements ActionListener{
 		else if(ae.getActionCommand().equals("="))
 		{
 			doOperation();
+			while (!operatorStack.isEmpty())
+			{
+				operatorStack.pop();
+			}
+			while(!operandStack.empty())
+			{
+				operandStack.pop();
+			}
+			
 			isNewNumber = true;
 		}
 		else if(ae.getActionCommand().equals("C"))
@@ -121,15 +148,15 @@ public class Calculator implements ActionListener{
 		return buttonPress.equals("+") || buttonPress.equals("-") 
 				|| buttonPress.equals("x") || buttonPress.equals("/");
 	}
-	public Integer doOperation()
+	public Long doOperation()
 	{
-		int newOutput;
+		Long newOutput;
 		if(!operandStack.empty())
 		{
 			if(operandStack.peek().equals("+"))
 			{
 				newOutput = operatorStack.peek() + Integer.parseInt(calcScreen.getText());
-				calcScreen.setText(Integer.toString(newOutput));
+				calcScreen.setText(Long.toString(newOutput));
 				operatorStack.pop();
 				operandStack.pop();
 				return newOutput;
@@ -137,7 +164,7 @@ public class Calculator implements ActionListener{
 			else if(operandStack.peek().equals("-"))
 			{
 				newOutput = operatorStack.peek() - Integer.parseInt(calcScreen.getText());
-				calcScreen.setText(Integer.toString(newOutput));
+				calcScreen.setText(Long.toString(newOutput));
 				operatorStack.pop();
 				operandStack.pop();
 				return newOutput;
@@ -145,7 +172,7 @@ public class Calculator implements ActionListener{
 			else if(operandStack.peek().equals("x"))
 			{
 				newOutput = operatorStack.peek() * Integer.parseInt(calcScreen.getText());
-				calcScreen.setText(Integer.toString(newOutput));
+				calcScreen.setText(Long.toString(newOutput));
 				operatorStack.pop();
 				operandStack.pop();
 				return newOutput;
@@ -156,7 +183,7 @@ public class Calculator implements ActionListener{
 				if(isError(Integer.parseInt(calcScreen.getText())))
 					return null;
 				newOutput = operatorStack.peek() / Integer.parseInt(calcScreen.getText());
-				calcScreen.setText(Integer.toString(newOutput));
+				calcScreen.setText(Long.toString(newOutput));
 				operatorStack.pop();
 				operandStack.pop();
 				return newOutput;
@@ -174,22 +201,22 @@ public class Calculator implements ActionListener{
 		
 		if(tempOperand.equals("+"))
 		{
-			operatorStack.push(Integer.parseInt(calcScreen.getText()));
+			operatorStack.push(Long.parseLong((calcScreen.getText())));
 			operandStack.push(tempOperand);
 		}
 		else if(tempOperand.equals("-"))
 		{
-			operatorStack.push(Integer.parseInt(calcScreen.getText()));
+			operatorStack.push(Long.parseLong((calcScreen.getText())));
 			operandStack.push(tempOperand);
 		}
 		else if(tempOperand.equals("x"))
 		{
-			operatorStack.push(Integer.parseInt(calcScreen.getText()));
+			operatorStack.push(Long.parseLong((calcScreen.getText())));
 			operandStack.push(tempOperand);
 		}
 		else
 		{
-			operatorStack.push(Integer.parseInt(calcScreen.getText()));
+			operatorStack.push(Long.parseLong((calcScreen.getText())));
 			operandStack.push(tempOperand);
 		}
 	}
