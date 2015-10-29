@@ -42,7 +42,7 @@ public class Calculator implements ActionListener{
 			
 			e.printStackTrace();
 		}
-		frame.setSize(400, 150);
+		frame.setSize(500, 200);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		frame.setLayout(new GridLayout(2,1));
