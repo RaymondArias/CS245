@@ -7,12 +7,15 @@ import javax.swing.*;
 public class Rolodex implements ActionListener
 {
 	private String inputData;
+	private String []picUrl;
 	private JTabbedPane tabPane;
 	private JFrame frame;
 	
 	public Rolodex()
 	{
 		inputData = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/contacts.txt";
+		picUrl = new String[9];
+		loadPictureURLs();
 		//initialize and set up Frame
 		frame = new JFrame("Rolodex");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -29,6 +32,7 @@ public class Rolodex implements ActionListener
 		}
 		setMenu(frame);
 		tabPane = new JTabbedPane();
+		tabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		addTab(tabPane, "Lindsy", "Montano", "Test", "C:\\Users\\rayar\\Dropbox\\Camera Uploads\\2013-12-25 14.25.08.jpg");
 		readData();
 		frame.add(tabPane);
@@ -186,6 +190,17 @@ public class Rolodex implements ActionListener
 			System.out.println(contactInfo[i]);
 		}
 		
+		
+	}
+	public void loadPictureURLs()
+	{
+		picUrl[0] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/bgates.jpg";
+		picUrl[1] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/mzuckerberg.jpg";
+		picUrl[2] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/bjoy.jpg";
+		picUrl[3] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/sjobs.jpg";
+		picUrl[4] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/dknuth.jpg";
+		picUrl[5] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/jdorsey.jpg";
+		picUrl[6] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/lpage.jpg";
 		
 	}
 	public void actionPerformed(ActionEvent e) {
