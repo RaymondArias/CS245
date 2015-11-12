@@ -33,7 +33,7 @@ public class Rolodex implements ActionListener
 		setMenu(frame);
 		tabPane = new JTabbedPane();
 		tabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		addTab(tabPane, "Lindsy", "Montano", "Test", "C:\\Users\\rayar\\Dropbox\\Camera Uploads\\2013-12-25 14.25.08.jpg");
+		addTab("Raymond", "Arias", "rarias2010@yahoo.com", "https://media.licdn.com/mpr/mpr/shrinknp_400_400/p/6/005/092/193/3695da9.jpg");
 		readData();
 		frame.add(tabPane);
 		frame.setVisible(true);
@@ -125,22 +125,29 @@ public class Rolodex implements ActionListener
 	 * @param email
 	 * @param pic
 	 */
-	public void addTab(JTabbedPane tabPane, String firstName, String lastName, String email, String pic)
+	public void addTab(String firstName, String lastName, String email, String pic)
 	{
 		JPanel newTab = new JPanel();
 		newTab.setLayout(new GridLayout(1,2));
-		ImageIcon photo = new ImageIcon(pic);
-		Image image = photo.getImage();
-		Image scaledImage = image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-		photo = new ImageIcon(scaledImage);
-		
-		if(photo == null)
-		{
-			try {
-				URL defaultPic = new URL("http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/nopic.jpg");
-			} catch (MalformedURLException e) {
+		ImageIcon photo = null;
+		Image image = null;
+		Image scaledImage = null;
+		try {
+			if(pic == null)
+			{
+				pic = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/nopic.jpg";
 			}
+			URL pictureURL = new URL(pic);
+			photo = new ImageIcon(pictureURL);
+			//image = photo.getImage();
+			//scaledImage = image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+			//photo = new ImageIcon(scaledImage);
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		
+		
 		
 		JLabel pictureSlot = new JLabel(photo);
 		JPanel strPanel = new JPanel();
@@ -168,13 +175,15 @@ public class Rolodex implements ActionListener
 			contactTxt = new URL(inputData);
 			try {
 				input = new BufferedReader(new InputStreamReader(contactTxt.openStream()));
-				String inputLine;
-				while(input.readLine() != null)
+				String inputLine = input.readLine();
+				while(inputLine != null)
 				{
-					inputLine = input.readLine();
+					
 					contactInfo = inputLine.split(":");
 					String []name = contactInfo[0].split(",");
-					addTab(tabPane,name[1], name[0], contactInfo[1], contactInfo[2]);
+					
+					addTab(name[1], name[0], contactInfo[1], getPicURL(contactInfo[2]));
+					inputLine = input.readLine();
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -201,7 +210,29 @@ public class Rolodex implements ActionListener
 		picUrl[4] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/dknuth.jpg";
 		picUrl[5] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/jdorsey.jpg";
 		picUrl[6] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/lpage.jpg";
+		picUrl[7] = null;
 		
+	}
+	public String getPicURL(String name)
+	{
+		if(name.equals("bgates.jpg"))
+			return picUrl[0];
+		else if(name.equals("mzuckerberg.jpg"))
+			return picUrl[1];
+		else if(name.equals("bjoy.jpg"))
+			return picUrl[2];
+		else if (name.equals("sjobs.jpg"))
+			return picUrl[3];
+		else if(name.equals("dknuth.jpg"))
+			return picUrl[4];
+		else if(name.equals("jdorsey.jpg"))
+			return picUrl[5];
+		else if(name.equals("lpage.jpg"))
+			return picUrl[6];
+		else if(name.equals("alovelace.jpg"))
+			return picUrl[7];
+			
+		return null;
 	}
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
