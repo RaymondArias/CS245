@@ -10,12 +10,14 @@ public class Rolodex implements ActionListener
 	private String []picUrl;
 	private JTabbedPane tabPane;
 	private JFrame frame;
+	private JDialog aboutDialog;
+	private ImageIcon appIcon;
 	
 	public Rolodex()
 	{
+		//Assign input data to contact.txt url
 		inputData = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/contacts.txt";
 		picUrl = new String[9];
-		loadPictureURLs();
 		//initialize and set up Frame
 		frame = new JFrame("Rolodex");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -24,18 +26,21 @@ public class Rolodex implements ActionListener
 		//set frame icon
 		try {
 			URL applicationIcon = new URL("http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/Rolodex.png");
-			ImageIcon appIcon = new ImageIcon(applicationIcon);
+			appIcon = new ImageIcon(applicationIcon);
 			frame.setIconImage(appIcon.getImage());
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		setMenu(frame);
+		setMenu();
+		createAboutDialog();
+		loadPictureURLs();
 		tabPane = new JTabbedPane();
 		tabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		addTab("Raymond", "Arias", "rarias2010@yahoo.com", "https://media.licdn.com/mpr/mpr/shrinknp_400_400/p/6/005/092/193/3695da9.jpg");
 		readData();
 		frame.add(tabPane);
+		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
 	/**
@@ -43,7 +48,7 @@ public class Rolodex implements ActionListener
 	 * for Rolodex application
 	 * @param frame
 	 */
-	public void setMenu(JFrame frame)
+	public void setMenu()
 	{
 		JMenuBar jmb = new JMenuBar();
 		
@@ -56,6 +61,7 @@ public class Rolodex implements ActionListener
 		file.setMnemonic(KeyEvent.VK_F);
 		open.addActionListener(this);
 		exit.addActionListener(this);
+		open.setEnabled(false);
 		file.add(open);
 		file.addSeparator();
 		file.add(exit);
@@ -98,7 +104,8 @@ public class Rolodex implements ActionListener
 		tab.addSeparator();
 		//Default submenu
 		JMenuItem defaults = new JMenuItem("Defaults");
-		defaults.setMnemonic(KeyEvent.VK_D);
+		defaults.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,
+                InputEvent.CTRL_MASK));
 		defaults.addActionListener(this);
 		tab.add(defaults);
 
@@ -128,10 +135,9 @@ public class Rolodex implements ActionListener
 	public void addTab(String firstName, String lastName, String email, String pic)
 	{
 		JPanel newTab = new JPanel();
+		newTab.setBackground(Color.WHITE);
 		newTab.setLayout(new GridLayout(1,2));
 		ImageIcon photo = null;
-		Image image = null;
-		Image scaledImage = null;
 		try {
 			if(pic == null)
 			{
@@ -148,13 +154,14 @@ public class Rolodex implements ActionListener
 		}
 		
 		
-		
 		JLabel pictureSlot = new JLabel(photo);
 		JPanel strPanel = new JPanel();
+		strPanel.setBackground(Color.WHITE);
 		strPanel.setLayout(new BorderLayout());
 		String nameSlot = "<html>Name: " +firstName + " " + lastName+ "<br>";
 		String emailSlot = "Email: " + email + "</html>";
 		JLabel data = new JLabel(nameSlot + emailSlot);
+		data.setHorizontalAlignment(JLabel.CENTER);
 		strPanel.add(data,BorderLayout.CENTER);
 		newTab.add(pictureSlot);
 		newTab.add(strPanel);
@@ -193,14 +200,11 @@ public class Rolodex implements ActionListener
 			// TODO Auto-generated catch block
 			return;
 		}
-		
-		for(int i = 0; i < contactInfo.length; i++)
-		{
-			System.out.println(contactInfo[i]);
-		}
-		
-		
 	}
+	/**
+	 * Assign indices of picUrl to url's from
+	 * project three folder
+	 */
 	public void loadPictureURLs()
 	{
 		picUrl[0] = "http://www.cpp.edu/~tvnguyen7/courses/cs245f15/projs/Rolodex-res/bgates.jpg";
@@ -213,6 +217,11 @@ public class Rolodex implements ActionListener
 		picUrl[7] = null;
 		
 	}
+	/**
+	 * Returns the url for picture assigned to the name passed in
+	 * @param name
+	 * @return
+	 */
 	public String getPicURL(String name)
 	{
 		if(name.equals("bgates.jpg"))
@@ -234,9 +243,63 @@ public class Rolodex implements ActionListener
 			
 		return null;
 	}
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+	/**
+	 * Creates about dialog and sets intial values
+	 */
+	public void createAboutDialog()
+	{
+		aboutDialog = new JDialog(frame, "About");
+		aboutDialog.setSize(250, 100);
+		aboutDialog.setLayout(new FlowLayout());
+		aboutDialog.getContentPane().setBackground(Color.WHITE);
+		aboutDialog.setLocationRelativeTo(frame);
+		aboutDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		JLabel dialogIcon = new JLabel(appIcon);
+		JLabel text = new JLabel("<html> Rolodex verison 0.1 <br> Copyright (c) R.Arias</html>");
+		aboutDialog.add(dialogIcon);
+		aboutDialog.add(text);
 		
+		
+	}
+	public void actionPerformed(ActionEvent ae) {
+		if(ae.getActionCommand().equals("Exit"))
+		{
+			System.exit(0);
+		}
+		else if(ae.getActionCommand().equals("Top"))
+		{
+			tabPane.setTabPlacement(JTabbedPane.TOP);
+		}
+		else if(ae.getActionCommand().equals("Bottom"))
+		{
+			tabPane.setTabPlacement(JTabbedPane.BOTTOM);
+		}
+		else if(ae.getActionCommand().equals("Right"))
+		{
+			tabPane.setTabPlacement(JTabbedPane.RIGHT);
+		}
+		else if(ae.getActionCommand().equals("Left"))
+		{
+			tabPane.setTabPlacement(JTabbedPane.LEFT);
+		}
+		else if(ae.getActionCommand().equals("Scroll"))
+		{
+			tabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		}
+		else if(ae.getActionCommand().equals("Wrap"))
+		{
+			tabPane.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
+		}
+		else if(ae.getActionCommand().equals("Defaults"))
+		{
+			tabPane.setTabPlacement(JTabbedPane.TOP);
+			tabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+			
+		}
+		else if(ae.getActionCommand().equals("About"))
+		{
+			aboutDialog.setVisible(true);
+		}
 	}
 	public static void main(String []args)
 	{
