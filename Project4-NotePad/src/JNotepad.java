@@ -1,9 +1,20 @@
+//Name: Arias, Raymond
+//Project:  4
+//Due 12/04/15 
+//Course:   CS245-01-f15
+//Description:
+//              A notepad imitation installed on windows
+
+import java.awt.event.ActionEvent;
 import java.io.*;
-import java.util.Scanner;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -15,19 +26,49 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author raria_000
  */
-public class JNotePad extends javax.swing.JFrame {
+public class JNotepad extends javax.swing.JFrame {
     private File mFile;
-    private JFileChooser chooser; 
+    private JFileChooser chooser;
+    private String searchString;
+    private LinkedList <Integer> beginList;
+    private int lastIndexViewed;
+    private boolean radioBtn;
+   
 
     /**
      * Creates new form JNotePad
      */
-    public JNotePad() {
+    public JNotepad() {
         initComponents();
-        ImageIcon img = new ImageIcon("notepad.png");
+        ImageIcon img = new ImageIcon("JNotepad.png");
         this.setIconImage(img.getImage());
         chooser = new JFileChooser();
+        searchString = "";
+        beginList = new LinkedList<>();
+        lastIndexViewed = 0;
+        radioBtn = false;
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+               if (!saveFileBeforeClose(new ActionEvent(evt.getComponent(), evt.getID(), evt.paramString())))
+               {
+                   return;
+                  
+               }
+                System.exit(0);
+            }
+        });
+        file.setMnemonic('F');
+        New.setMnemonic('N');
+        exit.setMnemonic('x');
+        edit.setMnemonic('E');
+        format.setMnemonic('o');
+        font.setMnemonic('F');
+        help.setMnemonic('H');
+        view.setMnemonic('V');
+        viewHelp.setMnemonic('H');
+ 
     }
+    
     class TxtFileFilter extends FileFilter
     {
 
@@ -49,6 +90,58 @@ public class JNotePad extends javax.swing.JFrame {
         }
         
     }
+    public boolean saveFileBeforeClose(ActionEvent evt)
+    {
+        Object[] options = {"Save", "Dont Save", "Cancel"};
+        if(mFile == null && jTextArea.getText().length() > 0)
+        {
+            
+            int n =JOptionPane.showOptionDialog(this, "Do you want to save changes to Untitled", "Notepad", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            //int n = JOptionPane.showConfirmDialog(this, "Notepad", "Do you want to save changes to Untitled", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options[0], options[1]);
+            if (n == JOptionPane.OK_OPTION)
+            {
+                saveAsActionPerformed(evt);
+            }
+            else if(n == JOptionPane.CANCEL_OPTION)
+            {
+                return false;
+            }
+        }   
+        
+        if(mFile != null)
+        {
+            String textFile = "";
+            try {
+                BufferedReader bf = new BufferedReader(new FileReader(mFile));
+                String tempStr = bf.readLine();
+                while(tempStr != null)
+                {
+                    textFile += tempStr;
+                    tempStr = bf.readLine();
+                    
+                }
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(JNotepad.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(JNotepad.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if(!textFile.equals(jTextArea.getText()))
+            {
+                int n = JOptionPane.showOptionDialog(this, "Do you want to save changes to " +mFile.getName(), "Notepad", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                if(n ==  JOptionPane.OK_OPTION)
+                {
+                    saveActionPerformed(evt);
+                }
+                else if (n == JOptionPane.CANCEL_OPTION)
+                {
+                    return false;
+                }
+                
+            }
+        }
+        return true;
+        
+    }
     public String getFileName(String temp)
     {
         
@@ -61,6 +154,43 @@ public class JNotePad extends javax.swing.JFrame {
         }
         return fileName;
     }
+    public JTextArea getTextArea()
+    {
+        return jTextArea;
+    }
+    public void selectText(LinkedList <Integer> position, String searchString, int index, boolean upDown)
+    {
+        if(index > position.size() -1 || index < 0)
+        {
+            return;
+        }
+        setLastFindOptions(position, searchString, index, upDown);
+        int begin = position.get(index);
+        int end = begin + searchString.length();
+        jTextArea.select(begin, end);
+    }
+    public void setLastFindOptions(LinkedList <Integer> position, String searchValue, int index, boolean upDown)
+    {
+        if(!beginList.equals(position))
+        {
+            beginList = position;
+            
+        }
+        if(!searchString.equals(searchValue))
+        {
+            searchString = searchValue;
+        }
+        if(lastIndexViewed != index)
+        {
+            lastIndexViewed = index;
+        }
+        if (radioBtn != upDown)
+        {
+            radioBtn = upDown;
+        }
+            
+        
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -71,6 +201,10 @@ public class JNotePad extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        notepadPopup = new javax.swing.JPopupMenu();
+        copyPopup = new javax.swing.JMenuItem();
+        pastePopup = new javax.swing.JMenuItem();
+        deletePopup = new javax.swing.JMenuItem();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextArea = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -92,33 +226,75 @@ public class JNotePad extends javax.swing.JFrame {
         delete = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         find = new javax.swing.JMenuItem();
-        jMenuItem6 = new javax.swing.JMenuItem();
+        findNext = new javax.swing.JMenuItem();
         jMenuItem4 = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         selectAll = new javax.swing.JMenuItem();
         timeDate = new javax.swing.JMenuItem();
         format = new javax.swing.JMenu();
-        wordWrap = new javax.swing.JMenuItem();
+        wordWrap = new javax.swing.JCheckBoxMenuItem();
         font = new javax.swing.JMenuItem();
         view = new javax.swing.JMenu();
-        statusBar = new javax.swing.JMenuItem();
+        statusBar = new javax.swing.JCheckBoxMenuItem();
         help = new javax.swing.JMenu();
         viewHelp = new javax.swing.JMenuItem();
-        jSeparator5 = new javax.swing.JPopupMenu.Separator();
-        about = new javax.swing.JMenu();
+        sep = new javax.swing.JPopupMenu.Separator();
+        about = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        notepadPopup.setComponentPopupMenu(notepadPopup);
+        notepadPopup.setName(""); // NOI18N
+
+        copyPopup.setText("Copy");
+        copyPopup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyPopupActionPerformed(evt);
+            }
+        });
+        notepadPopup.add(copyPopup);
+
+        pastePopup.setText("Paste");
+        pastePopup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pastePopupActionPerformed(evt);
+            }
+        });
+        notepadPopup.add(pastePopup);
+
+        deletePopup.setText("Delete");
+        deletePopup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deletePopupActionPerformed(evt);
+            }
+        });
+        notepadPopup.add(deletePopup);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Untitled - JNotepad");
         setAutoRequestFocus(false);
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                formMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                formMouseReleased(evt);
+            }
+        });
 
         jTextArea.setColumns(20);
         jTextArea.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
         jTextArea.setRows(5);
+        jTextArea.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jTextAreaMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jTextAreaMouseReleased(evt);
+            }
+        });
         jScrollPane2.setViewportView(jTextArea);
 
         file.setText("File");
-        file.setDisplayedMnemonicIndex(0);
 
         New.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
         New.setText("New");
@@ -164,7 +340,6 @@ public class JNotePad extends javax.swing.JFrame {
         file.add(jSeparator2);
 
         exit.setText("Exit");
-        exit.setDisplayedMnemonicIndex(1);
         exit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitActionPerformed(evt);
@@ -175,7 +350,6 @@ public class JNotePad extends javax.swing.JFrame {
         jMenuBar1.add(file);
 
         edit.setText("Edit");
-        edit.setDisplayedMnemonicIndex(0);
 
         jMenuItem3.setText("Undo");
         edit.add(jMenuItem3);
@@ -219,10 +393,21 @@ public class JNotePad extends javax.swing.JFrame {
 
         find.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
         find.setText("Find");
+        find.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                findActionPerformed(evt);
+            }
+        });
         edit.add(find);
 
-        jMenuItem6.setText("Find Next");
-        edit.add(jMenuItem6);
+        findNext.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F3, 0));
+        findNext.setText("Find Next");
+        findNext.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                findNextActionPerformed(evt);
+            }
+        });
+        edit.add(findNext);
 
         jMenuItem4.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem4.setText("Replace...");
@@ -244,40 +429,56 @@ public class JNotePad extends javax.swing.JFrame {
 
         timeDate.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
         timeDate.setText("Time/Date");
+        timeDate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                timeDateActionPerformed(evt);
+            }
+        });
         edit.add(timeDate);
 
         jMenuBar1.add(edit);
 
         format.setText("Format");
-        format.setDisplayedMnemonicIndex(1);
 
         wordWrap.setText("Word Wrap");
-        wordWrap.setDisplayedMnemonicIndex(0);
+        wordWrap.setToolTipText("");
+        wordWrap.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                wordWrapActionPerformed(evt);
+            }
+        });
         format.add(wordWrap);
 
-        font.setText("Font");
-        font.setDisplayedMnemonicIndex(0);
+        font.setText("Font...");
+        font.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fontActionPerformed(evt);
+            }
+        });
         format.add(font);
 
         jMenuBar1.add(format);
 
         view.setText("View");
-        view.setDisplayedMnemonicIndex(0);
 
         statusBar.setText("Status Bar");
+        statusBar.setToolTipText("");
         view.add(statusBar);
 
         jMenuBar1.add(view);
 
         help.setText("Help");
-        help.setDisplayedMnemonicIndex(0);
 
         viewHelp.setText("View Help");
-        viewHelp.setDisplayedMnemonicIndex(4);
         help.add(viewHelp);
-        help.add(jSeparator5);
+        help.add(sep);
 
         about.setText("About JNotepad");
+        about.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aboutActionPerformed(evt);
+            }
+        });
         help.add(about);
 
         jMenuBar1.add(help);
@@ -299,6 +500,10 @@ public class JNotePad extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void openActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openActionPerformed
+        if(!saveFileBeforeClose(evt))
+        {
+            return;
+        }
         
         chooser.setFileFilter(new TxtFileFilter());
         int result = chooser.showOpenDialog(null);
@@ -306,6 +511,10 @@ public class JNotePad extends javax.swing.JFrame {
         mFile = null;
         if (result ==  JFileChooser.APPROVE_OPTION)
             mFile = chooser.getSelectedFile();
+        if (mFile == null)
+        {
+            return;
+        }
         FileReader fileReader;
         
         try {
@@ -317,9 +526,9 @@ public class JNotePad extends javax.swing.JFrame {
             }
             fileReader.close();
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(JNotePad.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JNotepad.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(JNotePad.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JNotepad.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         this.setTitle(getFileName(mFile.getName()) + " - JNotePad");
@@ -333,6 +542,10 @@ public class JNotePad extends javax.swing.JFrame {
 
     private void NewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NewActionPerformed
         
+        if(!saveFileBeforeClose(evt))
+        {
+            return;
+        }
         jTextArea.setText("");
         this.setTitle("Untitled - JNotepad");
         mFile = null;
@@ -340,17 +553,24 @@ public class JNotePad extends javax.swing.JFrame {
 
     private void saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveActionPerformed
         
+        if(jTextArea.getText().length() == 0)
+        {
+            return;
+        }
         if(mFile == null)
         {
+            
             saveAsActionPerformed(evt);
             //Display save as prompt
+            if(mFile == null)
+                return;
         }
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(mFile));
             writer.write(jTextArea.getText());
             writer.close();
         } catch (IOException ex) {
-            Logger.getLogger(JNotePad.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JNotepad.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
@@ -365,12 +585,14 @@ public class JNotePad extends javax.swing.JFrame {
         {
             mFile = chooser.getSelectedFile();
         }
+        if(mFile == null)
+            return;
         if(!mFile.exists())
         {
             try {
                 mFile.createNewFile();
             } catch (IOException ex) {
-                Logger.getLogger(JNotePad.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(JNotepad.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         try {    
@@ -378,7 +600,7 @@ public class JNotePad extends javax.swing.JFrame {
             writer.write(jTextArea.getText());
             writer.close();
         } catch (IOException ex) {
-            Logger.getLogger(JNotePad.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JNotepad.class.getName()).log(Level.SEVERE, null, ex);
         }
         this.setTitle(getFileName(mFile.getName()) + " - JNotePad");
         
@@ -386,6 +608,8 @@ public class JNotePad extends javax.swing.JFrame {
 
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
         
+        if(!saveFileBeforeClose(evt))
+            return;
         System.exit(0);
     }//GEN-LAST:event_exitActionPerformed
 
@@ -407,14 +631,130 @@ public class JNotePad extends javax.swing.JFrame {
     }//GEN-LAST:event_pasteActionPerformed
 
     private void deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteActionPerformed
-        // TODO add your handling code here:
+        
         jTextArea.setText(jTextArea.getText().replace(jTextArea.getSelectedText(), ""));
     }//GEN-LAST:event_deleteActionPerformed
 
     private void selectAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllActionPerformed
-        // TODO add your handling code here:
+        
         jTextArea.selectAll();
     }//GEN-LAST:event_selectAllActionPerformed
+
+    private void timeDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeDateActionPerformed
+       DateFormat df = new SimpleDateFormat("hh:mm a MM/dd/yy");
+       Date date = new Date();
+       jTextArea.setText(jTextArea.getText() + df.format(date));
+       
+        
+    }//GEN-LAST:event_timeDateActionPerformed
+
+    private void findActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_findActionPerformed
+        
+        Find findDialog = new Find(this, false, this);
+        findDialog.setVisible(true);
+        
+        
+        
+    }//GEN-LAST:event_findActionPerformed
+
+    private void findNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_findNextActionPerformed
+        
+        if(radioBtn)
+        {
+            if(lastIndexViewed + 1 > beginList.size() - 1)
+            {
+                JOptionPane.showMessageDialog(this, "Cannot find: '" + searchString+ "'");
+                return;
+            }
+            lastIndexViewed++;
+            int begin = beginList.get(lastIndexViewed);
+            jTextArea.select(begin, begin + searchString.length());
+                        
+        }
+        else
+        {
+            if(lastIndexViewed - 1 < 0)
+            {
+                JOptionPane.showMessageDialog(this, "Cannot find: '" + searchString+ "'");
+                return;
+            }
+            lastIndexViewed--;
+            int begin = beginList.get(lastIndexViewed);
+            jTextArea.select(begin, begin + searchString.length());
+        }
+            
+    }//GEN-LAST:event_findNextActionPerformed
+
+    private void wordWrapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wordWrapActionPerformed
+        
+        if (wordWrap.isSelected())
+        {
+            jTextArea.setLineWrap(true);
+        }
+        else
+        {
+            jTextArea.setLineWrap(false);
+        }
+    }//GEN-LAST:event_wordWrapActionPerformed
+
+    private void aboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutActionPerformed
+        
+        About abt = new About(this, true);
+        abt.setVisible(true);
+    }//GEN-LAST:event_aboutActionPerformed
+
+    private void fontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fontActionPerformed
+        
+        JFontChooser fontChooser = new JFontChooser(this, true, this);
+        fontChooser.setVisible(true);
+    }//GEN-LAST:event_fontActionPerformed
+
+    private void copyPopupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyPopupActionPerformed
+        
+        jTextArea.copy();
+    }//GEN-LAST:event_copyPopupActionPerformed
+
+    private void formMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMousePressed
+        
+        if(evt.isPopupTrigger())
+        {
+            notepadPopup.show(evt.getComponent(), evt.getX(), evt.getY());
+        }
+    }//GEN-LAST:event_formMousePressed
+
+    private void formMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseReleased
+        
+         if(evt.isPopupTrigger())
+        {
+            notepadPopup.show(evt.getComponent(), evt.getX(), evt.getY());
+        }
+    }//GEN-LAST:event_formMouseReleased
+
+    private void jTextAreaMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextAreaMousePressed
+        
+        if(evt.isPopupTrigger())
+        {
+            notepadPopup.show(evt.getComponent(), evt.getX(), evt.getY());
+        }
+    }//GEN-LAST:event_jTextAreaMousePressed
+
+    private void jTextAreaMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextAreaMouseReleased
+        
+        if(evt.isPopupTrigger())
+        {
+            notepadPopup.show(evt.getComponent(), evt.getX(), evt.getY());
+        }
+    }//GEN-LAST:event_jTextAreaMouseReleased
+
+    private void pastePopupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pastePopupActionPerformed
+        
+        jTextArea.paste();
+    }//GEN-LAST:event_pastePopupActionPerformed
+
+    private void deletePopupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deletePopupActionPerformed
+        
+        jTextArea.setText(jTextArea.getText().replace(jTextArea.getSelectedText(), ""));
+    }//GEN-LAST:event_deletePopupActionPerformed
 
     /**
      * @param args the command line arguments
@@ -424,21 +764,24 @@ public class JNotePad extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new JNotePad().setVisible(true);
+                new JNotepad().setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem New;
-    private javax.swing.JMenu about;
+    private javax.swing.JMenuItem about;
     private javax.swing.JMenuItem copy;
+    private javax.swing.JMenuItem copyPopup;
     private javax.swing.JMenuItem cut;
     private javax.swing.JMenuItem delete;
+    private javax.swing.JMenuItem deletePopup;
     private javax.swing.JMenu edit;
     private javax.swing.JMenuItem exit;
     private javax.swing.JMenu file;
     private javax.swing.JMenuItem find;
+    private javax.swing.JMenuItem findNext;
     private javax.swing.JMenuItem font;
     private javax.swing.JMenu format;
     private javax.swing.JMenu help;
@@ -448,24 +791,25 @@ public class JNotePad extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
-    private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JPopupMenu.Separator jSeparator4;
-    private javax.swing.JPopupMenu.Separator jSeparator5;
     private javax.swing.JTextArea jTextArea;
+    private javax.swing.JPopupMenu notepadPopup;
     private javax.swing.JMenuItem open;
     private javax.swing.JMenuItem paste;
+    private javax.swing.JMenuItem pastePopup;
     private javax.swing.JMenuItem save;
     private javax.swing.JMenuItem saveAs;
     private javax.swing.JMenuItem selectAll;
-    private javax.swing.JMenuItem statusBar;
+    private javax.swing.JPopupMenu.Separator sep;
+    private javax.swing.JCheckBoxMenuItem statusBar;
     private javax.swing.JMenuItem timeDate;
     private javax.swing.JMenu view;
     private javax.swing.JMenuItem viewHelp;
-    private javax.swing.JMenuItem wordWrap;
+    private javax.swing.JCheckBoxMenuItem wordWrap;
     // End of variables declaration//GEN-END:variables
 
 }
